@@ -9,8 +9,11 @@ const github = require("@actions/github");
     const token = core.getInput('TOKEN', {required: true, trimWhitespace: true})
 
     const filteredBody = body.substr(1, body.length - 2) // Trim quotes off end
-    const username = filteredBody.match(new RegExp('GitHub Username.+'))[0].split('\\n\\n')[1].trim()
-
+    let username = filteredBody.match(new RegExp('GitHub Username.+'))[0].split('\\n\\n')[1].trim()
+    if (username.startsWith('@')) {
+        username = username.substr(1)
+    }
+    
     const client = await github.getOctokit(token)
     try {
         core.info(`Removing user ${username} from the ${org} org`)
