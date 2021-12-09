@@ -13,7 +13,7 @@ const github = require("@actions/github");
     if (username.startsWith('@')) {
         username = username.substr(1)
     }
-    
+
     const client = await github.getOctokit(token)
     try {
         core.info(`Removing user ${username} from the ${org} org`)
@@ -21,18 +21,6 @@ const github = require("@actions/github");
             org: org,
             username: username
         })
-    } catch (e) {
-        core.setFailed(`Failed removing user from org: ${e}`)
-        await client.rest.issues.createComment({
-            owner: org,
-            repo: repo,
-            issue_number: issueNumber,
-            body: `Failed removing user from org: ${e.message}`
-        })
-        return
-    }
-
-    try {
         core.info(`Creating success comment`)
         await client.rest.issues.createComment({
             owner: org,
@@ -40,6 +28,28 @@ const github = require("@actions/github");
             issue_number: issueNumber,
             body: `${username} successfully removed from org`
         })
+    } catch (e) {
+        if (e.status === 404) {
+            core.info(`User already removed from org`)
+            await client.rest.issues.createComment({
+                owner: org,
+                repo: repo,
+                issue_number: issueNumber,
+                body: `User already removed from org`
+            })
+        } else {
+            core.setFailed(`Failed removing user from org: ${e}`)
+            await client.rest.issues.createComment({
+                owner: org,
+                repo: repo,
+                issue_number: issueNumber,
+                body: `Failed removing user from org: ${e.message}`
+            })
+            return
+        }
+    }
+
+    try {
         core.info(`Closing issue ${org}/${repo}#${issueNumber}`)
         await client.rest.issues.update({
             owner: org,

@@ -4,8 +4,14 @@
   "main": "index.js",
   "author": "Brett Logan",
   "license": "Apache-2.0",
+  "scripts": {
+    "build": "npm install && ./node_modules/.bin/ncc build"
+  },
   "dependencies": {
-    "@actions/core": "^1.5.0",
+    "@actions/core": "^1.6.0",
     "@actions/github": "^5.0.0"
+  },
+  "devDependencies": {
+    "@vercel/ncc": "^0.33.0"
   }
 }
